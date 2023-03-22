@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         sb.ltn.fi Time Saved Column
-// @namespace    http://tampermonkey
+// @namespace    NMA
 // @version      1.1
 // @description  Adds a "Time Saved" column to the video table on LTN site and populates it with the product of "Views" and "Length" columns for each row.
 // @author       ChatGPT, NoMoreAngel
 // @match        https://sb.ltn.fi/video/*
 // @match        https://sb.ltn.fi/username/*
+// @updateURL    https://github.com/NoMoreAngel/userscripts/raw/main/sbltnfi/sbltnfi-time-saved-column.user.js
+// @downloadURL  https://github.com/NoMoreAngel/userscripts/raw/main/sbltnfi/sbltnfi-time-saved-column.user.js
 // ==/UserScript==
 
 (function() {
