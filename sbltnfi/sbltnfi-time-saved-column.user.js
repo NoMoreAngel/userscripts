@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         sb.ltn.fi Time Saved Column
 // @namespace    NMA
-// @version      1.1
+// @version      1.2
 // @description  Adds a "Time Saved" column to the video table on LTN site and populates it with the product of "Views" and "Length" columns for each row.
 // @author       ChatGPT, NoMoreAngel
-// @match        https://sb.ltn.fi/video/*
-// @match        https://sb.ltn.fi/username/*
+// @match        https://sb.ltn.fi/*
 // @updateURL    https://github.com/NoMoreAngel/userscripts/raw/main/sbltnfi/sbltnfi-time-saved-column.user.js
 // @downloadURL  https://github.com/NoMoreAngel/userscripts/raw/main/sbltnfi/sbltnfi-time-saved-column.user.js
 // ==/UserScript==
@@ -14,35 +13,35 @@
     'use strict';
 
     // Find the table element
-    var table = document.querySelector('.table-hover');
+    const table = document.querySelector('.table-hover');
 
     // Find the header row and append a new cell with the "Time Saved" header
-    var headerRow = table.querySelector('thead tr');
-    var timeSavedHeader = document.createElement('th');
+    const timeSavedHeader = document.createElement('th');
     timeSavedHeader.textContent = 'Time Saved';
-    headerRow.appendChild(timeSavedHeader);
+    const headers = [...document.querySelectorAll("thead th")]
+    const headerNames = headers.map(item => item.textContent.trim());
+    const lengthIndex = headerNames.indexOf("Length")
+    const viewsIndex = headerNames.indexOf("Views")
+    headers[viewsIndex].after(timeSavedHeader);
+    function addColumn() {
+        // Find all the data rows and append a new cell with the product of "Views" and "Length"
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.querySelector('td.time-saved')) return
+            const views = parseInt(row.children[viewsIndex].textContent);
+            const duration = row.children[lengthIndex].textContent
+                .split(':')
+                .map(time => parseFloat(time))
+                .reduce((total, time) => total * 60 + time );
+            const timeSaved = views * duration;
+            const timeSavedCell = document.createElement('td');
+            timeSavedCell.classList.add("time-saved")
+            timeSavedCell.textContent = formatTime(timeSaved);
+            row.children[viewsIndex].after(timeSavedCell);
+        });
+    }
+    addColumn()
+    document.addEventListener("newSegments", (e) => addColumn());
 
-    // Find all the data rows and append a new cell with the product of "Views" and "Length"
-    var dataRows = table.querySelectorAll('tbody tr');
-    dataRows.forEach(function(row) {
-        var views;
-        var duration;
-        var pathname = new URL(document.URL).pathname
-         if (pathname.includes("/username/")) {
-             views = parseInt(row.querySelector('td:nth-child(7)').textContent);
-             duration = row.querySelector('td:nth-child(5)').textContent;
-         } else {
-             views = parseInt(row.querySelector('td:nth-child(6)').textContent);
-             duration = row.querySelector('td:nth-child(4)').textContent;
-         }
-        var durationInSeconds = duration.split(':')
-            .map(function(time) { return parseFloat(time); })
-            .reduce(function(total, time) { return total * 60 + time; });
-        var timeSaved = views * durationInSeconds;
-        var timeSavedCell = document.createElement('td');
-        timeSavedCell.textContent = formatTime(timeSaved);
-        row.appendChild(timeSavedCell);
-    });
     // Format the time in DD:HH:MM:SS format
     function formatTime(timeInSeconds) {
         const days = Math.floor(timeInSeconds / (24 * 60 * 60));
