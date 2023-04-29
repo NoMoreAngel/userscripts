@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         sb.ltn.fi Time Saved Column
 // @namespace    NMA
-// @version      1.2
+// @version      1.3
 // @description  Adds a "Time Saved" column to the video table on LTN site and populates it with the product of "Views" and "Length" columns for each row.
 // @author       ChatGPT, NoMoreAngel
 // @match        https://sb.ltn.fi/*
@@ -47,9 +47,7 @@
         const days = Math.floor(timeInSeconds / (24 * 60 * 60));
         const hours = Math.floor(timeInSeconds / (60 * 60)) % 24;
         const minutes = Math.floor(timeInSeconds / 60) % 60;
-        const seconds = timeInSeconds % 60;
-        const secondsrounded = Math.round(seconds * 1000) / 1000;
-
+        const seconds = Math.round(timeInSeconds % 60); // Round to nearest second
         let formattedTime = "";
 
         if (days > 0) {
@@ -64,7 +62,7 @@
             formattedTime += minutes + "m ";
         }
 
-        formattedTime += secondsrounded + "s";
+        formattedTime += seconds + "s"; // Use rounded seconds
 
         return formattedTime;
     }
