@@ -18,28 +18,40 @@
     // Find the header row and append a new cell with the "Time Saved" header
     const timeSavedHeader = document.createElement('th');
     timeSavedHeader.textContent = 'Time Saved';
-    const headers = [...document.querySelectorAll("thead th")]
+    const headers = [...document.querySelectorAll("thead th")];
     const headerNames = headers.map(item => item.textContent.trim());
-    const lengthIndex = headerNames.indexOf("Length")
-    const viewsIndex = headerNames.indexOf("Views")
+    const lengthIndex = headerNames.indexOf("Length");
+    const viewsIndex = headerNames.indexOf("Views");
+    const categoryIndex = headerNames.indexOf("Category");
     headers[viewsIndex].after(timeSavedHeader);
+
     function addColumn() {
         // Find all the data rows and append a new cell with the product of "Views" and "Length"
         table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.querySelector('td.time-saved')) return
-            const views = parseInt(row.children[viewsIndex].textContent);
-            const duration = row.children[lengthIndex].textContent
-                .split(':')
-                .map(time => parseFloat(time))
-                .reduce((total, time) => total * 60 + time );
-            const timeSaved = views * duration;
+            if (row.querySelector('td.time-saved')) return;
+
+            const category = row.children[categoryIndex].textContent.trim();
             const timeSavedCell = document.createElement('td');
-            timeSavedCell.classList.add("time-saved")
-            timeSavedCell.textContent = formatTime(timeSaved);
+            timeSavedCell.classList.add("time-saved");
+            
+            // filter some categories which don't make sense to display as "time saved"
+            if (["chapter", "poi_highlight", "exclusive_access"].some(prefix => category.startsWith(prefix))) {
+                timeSavedCell.textContent = 'N/A';
+            } else {
+                const views = parseInt(row.children[viewsIndex].textContent);
+                const duration = row.children[lengthIndex].textContent
+                    .split(':')
+                    .map(time => parseFloat(time))
+                    .reduce((total, time) => total * 60 + time);
+                const timeSaved = views * duration;
+                timeSavedCell.textContent = formatTime(timeSaved);
+            }
+
             row.children[viewsIndex].after(timeSavedCell);
         });
     }
-    addColumn()
+
+    addColumn();
     document.addEventListener("newSegments", (e) => addColumn());
 
     // Format the time in DD:HH:MM:SS format
